@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Solicitud de Servicio Internet ISP</title>
+  <style>
+    /* ESTILOS GENERALES */
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f6f9; color: #333; padding: 20px; }
+    .contenedor { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #1a1a1a; margin-bottom: 30px; border-bottom: 2px solid #3182ce; padding-bottom: 10px; }
+    fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; background-color: #fff; }
+    legend { font-weight: bold; color: #3182ce; padding: 0 10px; font-size: 18px; }
+    .titulo-seccion { font-size: 15px; margin: 25px 0 15px 0; color: #444; border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
+    
+    /* GRILLAS */
+    .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    .fila-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    .fila-4 { display: grid; grid-template-columns: 0.5fr 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    
+    /* INPUTS */
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+    .radio-group { display: flex; gap: 15px; align-items: center; margin-top: 5px; }
+    .radio-group label { font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-bottom: 0; }
+    input[type="text"], input[type="date"], input[type="number"], input[type="email"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    input:disabled, input[readonly] { background: #f9f9f9; border: 1px dashed #aaa; color: #555; font-weight: bold; }
+    
+    /* CAJA CON SÍMBOLO DE MONEDA */
+    .input-moneda { display: flex; align-items: center; }
+    .input-moneda span { background: #eee; border: 1px solid #ccc; border-right: none; padding: 10px; border-radius: 4px 0 0 4px; font-weight: bold; color: #555;}
+    .input-moneda input { border-radius: 0 4px 4px 0; }
+    
+    /* OBSERVACIONES (CONTRATO) */
+    .observaciones { background-color: #f8fafc; border-left: 4px solid #3182ce; padding: 15px; font-size: 13px; color: #444; line-height: 1.5; margin-top: 20px;}
+    .observaciones h4 { margin: 0 0 5px 0; color: #2d3748; }
+    .observaciones ul { margin-top: 5px; padding-left: 20px; }
+
+    /* ESTILOS PARA LOS CUADRADITOS DEL CORREO */
+    .email-boxes-container { display: flex; gap: 2px; margin-top: 10px; flex-wrap: wrap; }
+    .email-box { width: 20px; height: 25px; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 14px; font-weight: bold; text-transform: uppercase; }
+    
+    /* REGLAS PARA IMPRESIÓN */
+    @media print {
+      body { background-color: white; padding: 0; }
+      .contenedor { box-shadow: none; padding: 0; max-width: 100%; }
+      .no-imprimir { display: none !important; }
+      fieldset { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="contenedor">
+  <h2>Solicitud de Servicio</h2>
+  
+  <form id="formularioEpec">
+    
+    <!-- ========================================== -->
+    <!-- SECCIÓN 1: GESTIÓN Y CLASIFICACIÓN         -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>1. Gestión y Clasificación</legend>
+
+      <div class="fila">
+        <div>
+          <label>Delegación / Zona *</label>
+          <select name="delegacion" required style="width: 120px;">
+            <option value="">Elegir...</option>
+            <option value="A">A</option><option value="B">B</option>
+            <option value="C">C</option><option value="D">D</option>
+            <option value="E">E</option><option value="F">F</option>
+            <option value="G">G</option><option value="H">H</option>
+          </select>
+        </div>
+        <div>
+          <label>Otra</label>
+          <input type="text" name="delegacion_otra" placeholder="Especificar si es otra...">
+        </div>
+      </div>
+
+      <div class="fila-3">
+        <div>
+          <label>Fecha Contrato *</label>
+          <input type="date" id="fecha_contrato" name="fecha_contrato" required>
+        </div>
+        <div>
+          <label>Relev. Técnico</label>
+          <input type="text" name="relev_tecnico" disabled placeholder="Se completa en papel">
+        </div>
+        <div>
+          <label>Instalación</label>
+          <input type="text" name="instalacion" disabled placeholder="Se completa en papel">
+        </div>
+      </div>
+
+      <div class="fila">
+        <div>
+          <label>Responsable de Cuenta *</label>
+          <select name="responsable_cuenta" required>
+            <option value="">Seleccionar...</option>
+            <option value="Rubén J. Mancini">Rubén J. Mancini</option>
+            <option value="Santiago Rodriguez Isleño">Santiago Rodriguez Isleño</option>
+            <option value="Alvaro Peralta">Alvaro Peralta</option>
+            <option value="Francesco Calabró">Francesco Calabró</option>
+          </select>
+        </div>
+        <div>
+          <label>Ancho de Banda Contratado (Mbps) *</label>
+          <div class="input-moneda">
+            <input type="text" id="ancho_banda" name="ancho_banda" required placeholder="Ej: 1.000" oninput="formatearAnchoBanda(this)">
+            <span style="border-radius: 0 4px 4px 0; border-left: none; border: 1px solid #ccc;">Mbps</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label>Tipo de Servicio *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="tipo_servicio" value="Internet Dedicado" required> Internet Dedicado</label>
+          <label><input type="radio" name="tipo_servicio" value="Internet Dinámico"> Internet Dinámico</label>
+          <label><input type="radio" name="tipo_servicio" value="Transporte de Datos"> Transporte de Datos</label>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label>Tipo de Solicitud *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="tipo_solicitud" value="Nuevo Cliente" required> Nuevo Cliente</label>
+          <label><input type="radio" name="tipo_solicitud" value="Nuevo Producto"> Nuevo Producto</label>
+          <label><input type="radio" name="tipo_solicitud" value="Up Grade"> Up Grade</label>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ========================================== -->
+    <!-- SECCIÓN 2: DATOS TEL-KIT Y DE LA CUENTA    -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>2. Datos TEL-KIT y Datos de la Cuenta</legend>
+      
+      <div class="titulo-seccion" style="margin-top: 0;">DATOS TEL-KIT</div>
+      <div class="fila-3">
+        <div><label>Cuenta N° *</label><input type="text" name="cuenta_n" required></div>
+        <div><label>Persona N° *</label><input type="text" name="persona_n" required></div>
+        <div><label>Contrato N° *</label><input type="text" name="contrato_n" required></div>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <label>Clasificación Cliente *</label>
+        <div class="radio-group">
+          <label><input type="radio" name="clasificacion_cliente" value="Corporativo" required> Corporativo</label>
+          <label><input type="radio" name="clasificacion_cliente" value="Pyme"> Pyme</label>
+          <label><input type="radio" name="clasificacion_cliente" value="ISP"> ISP</label>
+        </div>
+      </div>
+
+      <div class="titulo-seccion">1. DATOS DE LA CUENTA (Dpto. Comercial)</div>
+      
+      <div class="fila">
+        <div><label>Razón Social *</label><input type="text" name="razon_social" required></div>
+        <div><label>Domicilio *</label><input type="text" name="domicilio" required></div>
+      </div>
+
+      <div class="fila-3">
+        <div><label>Localidad *</label><input type="text" name="localidad" required></div>
+        <div>
+          <!-- CAMBIO: Menú de Provincias Limítrofes -->
+          <label>Provincia *</label>
+          <select name="provincia" required>
+            <option value="Córdoba" selected>Córdoba</option>
+            <option value="Buenos Aires">Buenos Aires</option>
+            <option value="Catamarca">Catamarca</option>
+            <option value="La Pampa">La Pampa</option>
+            <option value="La Rioja">La Rioja</option>
+            <option value="San Luis">San Luis</option>
+            <option value="Santa Fe">Santa Fe</option>
+            <option value="Santiago del Estero">Santiago del Estero</option>
+          </select>
+        </div>
+        <div><label>Código Postal *</label><input type="text" name="codigo_postal" required></div>
+      </div>
+
+      <div class="fila">
+        <div><label>Teléfonos *</label><input type="text" name="telefonos" required placeholder="Ej: 0351-4123456"></div>
+        <div><label>CUIT *</label><input type="text" name="cuit" required placeholder="XX-XXXXXXXX-X" oninput="formatearCUIT(this)"></div>
+      </div>
+
+      <div class="fila">
+        <div>
+          <label>Condición de I.V.A *</label>
+          <div class="radio-group">
+            <label><input type="radio" name="iva" value="RI" required> RI</label>
+            <label><input type="radio" name="iva" value="Exe"> Exe</label>
+            <label><input type="radio" name="iva" value="CF"> CF</label>
+            <label><input type="radio" name="iva" value="Monotributo"> Monotributo</label>
+          </div>
+        </div>
+        <div>
+          <label>Agente Retención</label>
+          <div class="radio-group" style="flex-wrap: wrap;">
+            <label><input type="radio" name="agente_retencion" value="I.V.A" onchange="alternarOtroAgente()"> I.V.A</label>
+            <label><input type="radio" name="agente_retencion" value="I.B." onchange="alternarOtroAgente()"> I.B.</label>
+            <label><input type="radio" name="agente_retencion" value="Otro" onchange="alternarOtroAgente()"> Otro</label>
+            <input type="text" id="agente_otro_input" name="agente_retencion_otro" placeholder="Especificar..." style="display: none; width: 120px; padding: 5px;">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label>Correos Electrónicos * <span style="font-weight: normal; color: #666; font-size: 12px;">(Se adaptará a formato casilleros al imprimir)</span></label>
+        <input type="email" name="correo" class="no-imprimir" required placeholder="ejemplo@correo.com" oninput="actualizarCuadraditos(this.value)">
+        <div id="contenedor-cuadraditos" class="email-boxes-container"></div>
+      </div>
+    </fieldset>
+
+    <!-- ========================================== -->
+    <!-- SECCIÓN 3: FACTURACIÓN Y CONTRATO          -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>3. Detalles de Facturación y Contrato</legend>
+      
+      <!-- CAMBIO: 2.1 CARGOS A FACTURAR (CUOTAS) -->
+      <div class="titulo-seccion" style="margin-top: 0;">2.1 Cargos a Facturar (Dpto. Comercial)</div>
+      <div class="fila-4" style="align-items: start;">
+        <div>
+          <label>Cuotas *</label>
+          <select id="cant_21" name="cant_21" required onchange="calcularTotales()">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <div>
+          <label>Descripción *</label>
+          <input type="text" name="desc_21" required>
+        </div>
+        <div>
+          <label>Importe Total *</label>
+          <div class="input-moneda">
+            <span>u$s</span>
+            <input type="number" id="imp_21" name="imp_21" step="0.01" required oninput="calcularTotales()">
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <label style="color: #555; font-size: 13px;">Subtotal (por cuota)</label>
+            <div class="input-moneda">
+              <span>u$s</span>
+              <input type="text" id="sub_21" name="sub_21" readonly tabindex="-1" style="background-color: #f9f9f9; padding: 8px;">
+            </div>
+          </div>
+          <div>
+            <label style="color: #2b6cb0;">Total</label>
+            <div class="input-moneda">
+              <span style="background: #2b6cb0; color: white; border-color: #2b6cb0;">u$s</span>
+              <input type="text" id="tot_21" name="tot_21" readonly tabindex="-1" style="font-weight: bold; border-color: #2b6cb0; background-color: #ebf8ff; padding: 8px;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.2 CARGO POR ABONOS -->
+      <div class="titulo-seccion">2.2 Cargo por Abonos de Servicios</div>
+      <div class="fila-4">
+        <div>
+          <label>Cantidad (Meses) *</label>
+          <select id="cant_22" name="cant_22" required onchange="calcularTotales()">
+            <option value="">Elegir...</option>
+            <option value="1">1</option>
+            <option value="12">12</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+        <div>
+          <label>Descripción *</label>
+          <input type="text" name="desc_22" required>
+        </div>
+        <div>
+          <label>Importe *</label>
+          <div class="input-moneda">
+            <span>u$s</span>
+            <input type="number" id="imp_22" name="imp_22" step="0.01" required oninput="calcularTotales()">
+          </div>
+        </div>
+        <div>
+          <label>Total</label>
+          <div class="input-moneda">
+            <span>u$s</span>
+            <input type="text" id="tot_22" name="tot_22" readonly tabindex="-1">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.4 DURACIÓN Y VALOR TOTAL -->
+      <div class="titulo-seccion">2.4 Duración y Valor Total del Contrato</div>
+      
+      <div class="fila-3">
+        <div>
+          <label>Plazo de Contrato *</label>
+          <input type="text" id="plazo_contrato" name="plazo_contrato" readonly placeholder="Auto-completado (meses)">
+        </div>
+        <div>
+          <label>Cargos por Única Vez</label>
+          <div class="input-moneda">
+            <span>u$s</span>
+            <!-- Este se ingresa manual y no es obligatorio -->
+            <input type="number" id="cargos_unica_vez" name="cargos_unica_vez" step="0.01" oninput="calcularTotales()">
+          </div>
+        </div>
+        <div>
+          <label>Cargos por Abonos de Servicios *</label>
+          <div class="input-moneda">
+            <span>u$s</span>
+            <!-- Viene de 2.2 automáticamente -->
+            <input type="text" id="cargos_abonos" name="cargos_abonos" readonly required>
+          </div>
+        </div>
+      </div>
+
+      <div class="fila">
+        <div>
+          <label>Duración del Contrato</label>
+          <!-- Replica la cantidad de meses para impresión -->
+          <input type="text" id="duracion_contrato" name="duracion_contrato" readonly placeholder="Auto-completado (meses)">
+        </div>
+        <div>
+          <label style="color: #2b6cb0;">Valor Total del Contrato</label>
+          <div class="input-moneda">
+            <span style="background: #2b6cb0; color: white; border-color: #2b6cb0;">u$s</span>
+            <input type="text" id="valor_total_contrato" name="valor_total_contrato" readonly style="font-weight: bold; border-color: #2b6cb0; background-color: #ebf8ff;">
+          </div>
+        </div>
+      </div>
+
+      <!-- OBSERVACIONES LEGALES -->
+      <div class="observaciones">
+        <h4>Precios</h4>
+        <ul>
+          <li>Son en Dólares Estadounidenses y se mantendrán durante toda la vigencia del contrato.</li>
+          <li>No incluyen IVA, impuesto, tasa, cargo o contribución alguna, presente o futuro, los que de ser aplicables estarán a cargo del Cliente y serán incluidos en las facturas mensuales.</li>
+        </ul>
+        
+        <h4>Facturación</h4>
+        <ul>
+          <li>Toda la facturación se emitirá en pesos a la cotización del dólar transferencia vendedor del Banco de la Nación Argentina al cierre de las operaciones del día inmediato anterior a la fecha de emisión de la factura.</li>
+          <li>El Cargo Mensual se facturará por “mes adelantado”.</li>
+        </ul>
+
+        <h4>Forma de pago</h4>
+        <ul>
+          <li><strong>Cargo Mensual:</strong> Contado dentro de los 15 días corridos de la fecha de emisión de la factura.</li>
+        </ul>
+      </div>
+
+    </fieldset>
+
+  </form>
+</div>
+
+<!-- ========================================== -->
+<!-- SCRIPTS (LÓGICA DEL FORMULARIO)            -->
+<!-- ========================================== -->
+<script>
+  // 1. Inicialización al cargar la página
+  document.addEventListener("DOMContentLoaded", function() {
+    const campoFecha = document.getElementById('fecha_contrato');
+    const hoy = new Date();
+    const formatoLocal = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+    campoFecha.value = formatoLocal;
+
+    actualizarCuadraditos('');
+  });
+
+  // 2. Formato de Ancho de Banda
+  function formatearAnchoBanda(input) {
+    let valor = input.value.replace(/\D/g, '');
+    if (valor !== '') {
+      let numero = parseInt(valor, 10);
+      if (numero > 1000000) numero = 1000000;
+      input.value = numero.toLocaleString('es-AR');
+    } else {
+      input.value = '';
+    }
+  }
+
+  // 3. Formato Automático de CUIT
+  function formatearCUIT(input) {
+    let v = input.value.replace(/\D/g, '');
+    if (v.length > 2 && v.length <= 10) {
+      v = v.substring(0, 2) + '-' + v.substring(2);
+    } else if (v.length > 10) {
+      v = v.substring(0, 2) + '-' + v.substring(2, 10) + '-' + v.substring(10, 11);
+    }
+    input.value = v;
+  }
+
+  // 4. Mostrar/Ocultar Agente de Retención
+  function alternarOtroAgente() {
+    const radios = document.getElementsByName('agente_retencion');
+    const campoOtro = document.getElementById('agente_otro_input');
+    let esOtro = false;
+    for (let radio of radios) {
+      if (radio.checked && radio.value === 'Otro') esOtro = true;
+    }
+    if (esOtro) {
+      campoOtro.style.display = 'block';
+      campoOtro.required = true;
+    } else {
+      campoOtro.style.display = 'none';
+      campoOtro.required = false;
+      campoOtro.value = '';
+    }
+  }
+
+  // 5. Generador de Cuadraditos
+  function actualizarCuadraditos(texto) {
+    const contenedor = document.getElementById('contenedor-cuadraditos');
+    contenedor.innerHTML = '';
+    const cantidadCajas = 40;
+    for (let i = 0; i < cantidadCajas; i++) {
+      let div = document.createElement('div');
+      div.className = 'email-box';
+      if (i < texto.length) div.innerText = texto[i];
+      contenedor.appendChild(div);
+    }
+  }
+
+  // 6. MOTOR DE CÁLCULO PARA LA SECCIÓN 3
+  function calcularTotales() {
+    // CAMBIO: Cálculo 2.1 (Cargos a Facturar - Cuotas)
+    let cuotas21 = parseInt(document.getElementById('cant_21').value) || 1;
+    let importeTotal21 = parseFloat(document.getElementById('imp_21').value) || 0;
+    
+    // Subtotal (valor por cuota)
+    let subtotal21 = importeTotal21 / cuotas21;
+    
+    document.getElementById('sub_21').value = importeTotal21 > 0 ? subtotal21.toFixed(2) : '';
+    document.getElementById('tot_21').value = importeTotal21 > 0 ? importeTotal21.toFixed(2) : '';
+
+    // Cálculo 2.2 (Cargo por Abonos)
+    let cant22 = parseInt(document.getElementById('cant_22').value) || 0;
+    let imp22 = parseFloat(document.getElementById('imp_22').value) || 0;
+    let tot22 = cant22 * imp22;
+    document.getElementById('tot_22').value = tot22 > 0 ? tot22.toFixed(2) : '';
+
+    // Llenado automático 2.4 (Duración y Valor Total)
+    let textoMeses = cant22 > 0 ? cant22 + ' Meses' : '';
+    document.getElementById('plazo_contrato').value = textoMeses;
+    document.getElementById('duracion_contrato').value = textoMeses;
+    document.getElementById('cargos_abonos').value = tot22 > 0 ? tot22.toFixed(2) : '';
+
+    let cargosUnicaVez = parseFloat(document.getElementById('cargos_unica_vez').value) || 0;
+    let valorTotal = cargosUnicaVez + tot22;
+    
+    document.getElementById('valor_total_contrato').value = valorTotal > 0 ? valorTotal.toFixed(2) : '';
+  }
+</script>
+
+</body>
+</html>
