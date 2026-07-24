@@ -38,6 +38,17 @@
     .email-boxes-container { display: flex; gap: 2px; margin-top: 10px; flex-wrap: wrap; }
     .email-box { width: 20px; height: 25px; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 14px; font-weight: bold; text-transform: uppercase; }
     
+    /* TABLA AUTORIZACIONES */
+    .tabla-firmas { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .tabla-firmas th { border: 1px solid #ccc; padding: 10px; background-color: #f8fafc; color: #333; text-transform: uppercase; font-size: 13px;}
+    .tabla-firmas td { border: 1px solid #ccc; height: 120px; vertical-align: bottom; padding: 10px; text-align: center; color: #888; font-size: 12px; }
+
+    /* ZONA DE FIRMAS FINALES */
+    .firmas-container { margin-top: 40px; padding-top: 30px; border-top: 2px dashed #bbb; page-break-inside: avoid; }
+    .bloque-firma { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 50px; }
+    .firma-box { text-align: left; }
+    .linea-firma { border-top: 1px solid #000; margin-top: 80px; padding-top: 5px; font-weight: bold; text-align: center; }
+
     /* REGLAS PARA IMPRESIÓN */
     @media print {
       body { background-color: white; padding: 0; }
@@ -156,16 +167,18 @@
       <div class="titulo-seccion">1. DATOS DE LA CUENTA (Dpto. Comercial)</div>
       
       <div class="fila">
-        <div><label>Razón Social *</label><input type="text" name="razon_social" required></div>
+        <!-- CAMBIO: oninput="espejarDatos()" para que la razón social pase a la firma final -->
+        <div><label>Razón Social *</label><input type="text" id="razon_social" name="razon_social" required oninput="espejarDatos()"></div>
         <div><label>Domicilio *</label><input type="text" name="domicilio" required></div>
       </div>
 
       <div class="fila-3">
-        <div><label>Localidad *</label><input type="text" name="localidad" required></div>
+        <!-- CAMBIO: oninput="espejarDatos()" para pasar la localidad al Dpto. Técnico -->
+        <div><label>Localidad *</label><input type="text" id="localidad_comercial" name="localidad" required oninput="espejarDatos()"></div>
         <div>
-          <!-- CAMBIO: Menú de Provincias Limítrofes -->
           <label>Provincia *</label>
-          <select name="provincia" required>
+          <!-- CAMBIO: onchange="espejarDatos()" para pasar la provincia al Dpto. Técnico -->
+          <select id="provincia_comercial" name="provincia" required onchange="espejarDatos()">
             <option value="Córdoba" selected>Córdoba</option>
             <option value="Buenos Aires">Buenos Aires</option>
             <option value="Catamarca">Catamarca</option>
@@ -218,7 +231,7 @@
     <fieldset>
       <legend>3. Detalles de Facturación y Contrato</legend>
       
-      <!-- CAMBIO: 2.1 CARGOS A FACTURAR (CUOTAS) -->
+      <!-- 2.1 CARGOS A FACTURAR (CUOTAS) -->
       <div class="titulo-seccion" style="margin-top: 0;">2.1 Cargos a Facturar (Dpto. Comercial)</div>
       <div class="fila-4" style="align-items: start;">
         <div>
@@ -319,7 +332,6 @@
       <div class="fila">
         <div>
           <label>Duración del Contrato</label>
-          <!-- Replica la cantidad de meses para impresión -->
           <input type="text" id="duracion_contrato" name="duracion_contrato" readonly placeholder="Auto-completado (meses)">
         </div>
         <div>
@@ -350,8 +362,145 @@
           <li><strong>Cargo Mensual:</strong> Contado dentro de los 15 días corridos de la fecha de emisión de la factura.</li>
         </ul>
       </div>
-
     </fieldset>
+
+    <!-- ========================================== -->
+    <!-- SECCIÓN 3: CALIFICACIÓN DEL CLIENTE        -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>3. Calificación del cliente</legend>
+      <div class="fila">
+        <div>
+          <label>Veraz <span style="font-weight: normal; color: #666;">(Fecha: _____/_____/________)</span></label>
+          <div class="radio-group" style="flex-wrap: wrap;">
+            <label><input type="radio" name="veraz" value="Sin antecedentes" required onchange="verificarCalificacion()"> Sin antecedentes</label>
+            <label><input type="radio" name="veraz" value="Antecedentes" onchange="verificarCalificacion()"> Antecedentes</label>
+            <label><input type="radio" name="veraz" value="Requiere Autorización" onchange="verificarCalificacion()"> Requiere Autorización</label>
+          </div>
+        </div>
+        <div>
+          <label>Dpto. Admin. <span style="font-weight: normal; color: #666;">(Fecha: _____/_____/________)</span></label>
+          <div class="radio-group" style="flex-wrap: wrap;">
+            <label><input type="radio" name="dpto_admin" value="Sin antecedentes" required onchange="verificarCalificacion()"> Sin antecedentes</label>
+            <label><input type="radio" name="dpto_admin" value="Antecedentes" onchange="verificarCalificacion()"> Antecedentes</label>
+            <label><input type="radio" name="dpto_admin" value="Requiere Autorización" onchange="verificarCalificacion()"> Requiere Autorización</label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Se habilita mediante JavaScript si aplica -->
+      <div id="caja_autorizado_por" style="display: none; margin-top: 15px;">
+        <label style="color: #e53e3e;">Autorizado por *</label>
+        <input type="text" id="autorizado_por" name="autorizado_por" placeholder="Nombre de quien autoriza..." style="border-color: #e53e3e;">
+      </div>
+    </fieldset>
+
+    <!-- ========================================== -->
+    <!-- SECCIÓN 4: AUTORIZACIONES                  -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>4. Autorizaciones</legend>
+      <table class="tabla-firmas">
+        <tr>
+          <th style="width: 33.3%;">Sector Comercial</th>
+          <th style="width: 33.3%;">Sector Técnico</th>
+          <th style="width: 33.3%;">Aprobación Final</th>
+        </tr>
+        <tr>
+          <td>Sello y Firma</td>
+          <td>Sello y Firma</td>
+          <td>Sello y Firma</td>
+        </tr>
+      </table>
+    </fieldset>
+
+    <!-- ========================================== -->
+    <!-- SECCIÓN 6: DATOS PARA LA INSTALACIÓN       -->
+    <!-- ========================================== -->
+    <fieldset>
+      <legend>6. Datos para la Instalación (Dpto. Técnico)</legend>
+      
+      <div class="fila">
+        <div>
+          <label>Domicilio *</label>
+          <select id="domicilio_instalacion" name="domicilio_instalacion" required onchange="verificarDomicilio()">
+            <option value="">Seleccionar...</option>
+            <option value="Empalme">Empalme</option>
+            <option value="Policia">Policia</option>
+            <option value="Hospital">Hospital</option>
+            <option value="Escuela">Escuela</option>
+            <option value="ET">ET</option>
+            <option value="Sitio EPEC">Sitio EPEC</option>
+          </select>
+        </div>
+        <!-- Aparece solo si eligen ET o Sitio EPEC -->
+        <div id="caja_detalle_domicilio" style="display: none;">
+          <label style="color: #e53e3e;">Detalle de ET / Sitio EPEC *</label>
+          <input type="text" id="detalle_domicilio" name="detalle_domicilio" placeholder="Especificar detalle o ubicación..." style="border-color: #e53e3e;">
+        </div>
+      </div>
+
+      <div class="fila">
+        <div>
+          <label>Coordenadas *</label>
+          <input type="text" name="coordenadas" required placeholder="Ej: -31.4201, -64.1888">
+        </div>
+        <div>
+          <label>Localidad</label>
+          <input type="text" id="localidad_instalacion" name="localidad_instalacion" readonly placeholder="Auto-completado" style="background-color: #f9f9f9; color: #555;">
+        </div>
+      </div>
+
+      <div class="fila">
+        <div>
+          <label>Provincia</label>
+          <input type="text" id="provincia_instalacion" name="provincia_instalacion" readonly placeholder="Auto-completado" style="background-color: #f9f9f9; color: #555;">
+        </div>
+        <div>
+          <label>Equipamiento U.M. *</label>
+          <div class="radio-group">
+            <label><input type="radio" name="equipamiento_um" value="Provee Cliente" required> Provee Cliente</label>
+            <label><input type="radio" name="equipamiento_um" value="Provee EPEC"> Provee EPEC</label>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <label>N° de direcciones IP asignadas *</label>
+        <input type="number" name="ip_asignadas" min="0" max="64" step="1" required placeholder="0 - 64" style="width: 150px;">
+      </div>
+    </fieldset>
+
+    <!-- ========================================== -->
+    <!-- ZONA FINAL DE FIRMAS DEL CONTRATO          -->
+    <!-- ========================================== -->
+    <div class="firmas-container">
+      <div style="font-weight: bold; font-size: 16px; margin-bottom: 30px;">
+        Córdoba, <span id="texto_fecha_actual" style="text-decoration: underline;"></span>
+      </div>
+
+      <div class="bloque-firma">
+        <!-- FIRMA EMPRESA -->
+        <div class="firma-box">
+          <div style="font-weight: bold; margin-bottom: 20px;">
+            Por <span id="texto_nombre_empresa">___________________________</span>
+          </div>
+          <div class="linea-firma">Firma</div>
+          <div style="margin-top: 20px; font-weight: bold;">Aclaración:</div>
+          <div style="margin-top: 20px; font-weight: bold;">Carácter:</div>
+        </div>
+
+        <!-- FIRMA EPEC -->
+        <div class="firma-box">
+          <div style="font-weight: bold; margin-bottom: 20px;">
+            Por E.P.E.C
+          </div>
+          <div class="linea-firma">Firma</div>
+          <div style="margin-top: 20px; font-weight: bold;">Aclaración:</div>
+          <div style="margin-top: 20px; font-weight: bold;">Carácter:</div>
+        </div>
+      </div>
+    </div>
 
   </form>
 </div>
@@ -364,10 +513,17 @@
   document.addEventListener("DOMContentLoaded", function() {
     const campoFecha = document.getElementById('fecha_contrato');
     const hoy = new Date();
+    
+    // Formato para el input type="date"
     const formatoLocal = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
     campoFecha.value = formatoLocal;
+    
+    // Formato visual para la firma final (Ej: 24/07/2026)
+    const fechaVisual = String(hoy.getDate()).padStart(2, '0') + '/' + String(hoy.getMonth() + 1).padStart(2, '0') + '/' + hoy.getFullYear();
+    document.getElementById('texto_fecha_actual').innerText = fechaVisual;
 
     actualizarCuadraditos('');
+    espejarDatos(); // Forzar la carga inicial de "Córdoba" en el dpto técnico
   });
 
   // 2. Formato de Ancho de Banda
@@ -426,23 +582,18 @@
 
   // 6. MOTOR DE CÁLCULO PARA LA SECCIÓN 3
   function calcularTotales() {
-    // CAMBIO: Cálculo 2.1 (Cargos a Facturar - Cuotas)
     let cuotas21 = parseInt(document.getElementById('cant_21').value) || 1;
     let importeTotal21 = parseFloat(document.getElementById('imp_21').value) || 0;
-    
-    // Subtotal (valor por cuota)
     let subtotal21 = importeTotal21 / cuotas21;
     
     document.getElementById('sub_21').value = importeTotal21 > 0 ? subtotal21.toFixed(2) : '';
     document.getElementById('tot_21').value = importeTotal21 > 0 ? importeTotal21.toFixed(2) : '';
 
-    // Cálculo 2.2 (Cargo por Abonos)
     let cant22 = parseInt(document.getElementById('cant_22').value) || 0;
     let imp22 = parseFloat(document.getElementById('imp_22').value) || 0;
     let tot22 = cant22 * imp22;
     document.getElementById('tot_22').value = tot22 > 0 ? tot22.toFixed(2) : '';
 
-    // Llenado automático 2.4 (Duración y Valor Total)
     let textoMeses = cant22 > 0 ? cant22 + ' Meses' : '';
     document.getElementById('plazo_contrato').value = textoMeses;
     document.getElementById('duracion_contrato').value = textoMeses;
@@ -452,6 +603,70 @@
     let valorTotal = cargosUnicaVez + tot22;
     
     document.getElementById('valor_total_contrato').value = valorTotal > 0 ? valorTotal.toFixed(2) : '';
+  }
+
+  // 7. Lógica: Calificación del Cliente (Sección 3)
+  function verificarCalificacion() {
+    const radiosVeraz = document.getElementsByName('veraz');
+    const radiosAdmin = document.getElementsByName('dpto_admin');
+    const cajaAutorizado = document.getElementById('caja_autorizado_por');
+    const inputAutorizado = document.getElementById('autorizado_por');
+    
+    let requiereAutorizacion = false;
+    
+    // Revisa si alguno de Veraz está en "Antecedentes" o "Requiere Autorización"
+    for (let r of radiosVeraz) {
+      if (r.checked && (r.value === 'Antecedentes' || r.value === 'Requiere Autorización')) requiereAutorizacion = true;
+    }
+    
+    // Revisa si alguno de Dpto Admin está en "Antecedentes" o "Requiere Autorización"
+    for (let r of radiosAdmin) {
+      if (r.checked && (r.value === 'Antecedentes' || r.value === 'Requiere Autorización')) requiereAutorizacion = true;
+    }
+
+    if (requiereAutorizacion) {
+      cajaAutorizado.style.display = 'block';
+      inputAutorizado.required = true;
+    } else {
+      cajaAutorizado.style.display = 'none';
+      inputAutorizado.required = false;
+      inputAutorizado.value = ''; // Limpiar el campo
+    }
+  }
+
+  // 8. Lógica: Detalle de Domicilio de Instalación (Sección 6)
+  function verificarDomicilio() {
+    const comboDomicilio = document.getElementById('domicilio_instalacion');
+    const cajaDetalle = document.getElementById('caja_detalle_domicilio');
+    const inputDetalle = document.getElementById('detalle_domicilio');
+
+    if (comboDomicilio.value === 'ET' || comboDomicilio.value === 'Sitio EPEC') {
+      cajaDetalle.style.display = 'block';
+      inputDetalle.required = true;
+    } else {
+      cajaDetalle.style.display = 'none';
+      inputDetalle.required = false;
+      inputDetalle.value = ''; // Limpiar el campo
+    }
+  }
+
+  // 9. Espejar datos (Conectar Comercial con Técnico y Firmas)
+  function espejarDatos() {
+    const razonSocial = document.getElementById('razon_social').value;
+    const localidadComercial = document.getElementById('localidad_comercial').value;
+    const provinciaComercial = document.getElementById('provincia_comercial').value;
+
+    // Pasarlos a Sección 6
+    document.getElementById('localidad_instalacion').value = localidadComercial;
+    document.getElementById('provincia_instalacion').value = provinciaComercial;
+
+    // Pasarlo a la Firma
+    const textoFirma = document.getElementById('texto_nombre_empresa');
+    if (razonSocial.trim() !== '') {
+      textoFirma.innerText = razonSocial;
+    } else {
+      textoFirma.innerText = '___________________________';
+    }
   }
 </script>
 
