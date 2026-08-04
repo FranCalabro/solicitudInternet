@@ -6,10 +6,16 @@
   <style>
     /* ESTILOS GENERALES */
     body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f6f9; color: #333; padding: 20px; }
-    .contenedor { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #1a1a1a; margin-bottom: 30px; border-bottom: 2px solid #3182ce; padding-bottom: 10px; }
+    .contenedor { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative;}
+    
+    /* LOGO PARA PANTALLA */
+    .logo-encabezado { text-align: right; margin-bottom: -40px; position: relative; z-index: 10; }
+    .logo-encabezado img { max-height: 55px; }
+
+    /* CAMBIO DE COLOR: Verde oscuro corporativo (#0f5132) */
+    h2 { text-align: center; color: #1a1a1a; margin-bottom: 30px; border-bottom: 2px solid #0f5132; padding-bottom: 10px; padding-top: 15px;}
     fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; background-color: #fff; }
-    legend { font-weight: bold; color: #3182ce; padding: 0 10px; font-size: 18px; }
+    legend { font-weight: bold; color: #0f5132; padding: 0 10px; font-size: 18px; }
     .titulo-seccion { font-size: 15px; margin: 25px 0 15px 0; color: #444; border-bottom: 1px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
     
     /* GRILLAS */
@@ -30,7 +36,7 @@
     .input-moneda input { border-radius: 0 4px 4px 0; }
     
     /* OBSERVACIONES (CONTRATO) */
-    .observaciones { background-color: #f8fafc; border-left: 4px solid #3182ce; padding: 15px; font-size: 13px; color: #444; line-height: 1.5; margin-top: 20px;}
+    .observaciones { background-color: #f8fafc; border-left: 4px solid #0f5132; padding: 15px; font-size: 13px; color: #444; line-height: 1.5; margin-top: 20px;}
     .observaciones h4 { margin: 0 0 5px 0; color: #2d3748; }
     .observaciones ul { margin-top: 5px; padding-left: 20px; }
 
@@ -49,18 +55,31 @@
     .firma-box { text-align: left; }
     .linea-firma { border-top: 1px solid #000; margin-top: 80px; padding-top: 5px; font-weight: bold; text-align: center; }
 
-    /* REGLAS PARA IMPRESIÓN */
+    /* REGLAS PARA IMPRESIÓN (Aquí ocurre la magia del logo en cada hoja) */
     @media print {
       body { background-color: white; padding: 0; }
-      .contenedor { box-shadow: none; padding: 0; max-width: 100%; }
+      .contenedor { box-shadow: none; padding: 0; max-width: 100%; padding-top: 50px; }
       .no-imprimir { display: none !important; }
       fieldset { page-break-inside: avoid; }
+      
+      .logo-encabezado { 
+        position: fixed; /* Esto hace que se repita en cada hoja */
+        top: 15px; 
+        right: 20px; 
+        margin: 0; 
+      }
     }
   </style>
 </head>
 <body>
 
 <div class="contenedor">
+  
+  <!-- LOGO (Reemplaza el 'src' con tu archivo, ej: src="logo.png") -->
+  <div class="logo-encabezado">
+    <img src="logo.png" alt="Logo Empresa">
+  </div>
+
   <h2>Solicitud de Servicio</h2>
   
   <form id="formularioEpec">
@@ -114,11 +133,29 @@
             <option value="Francesco Calabró">Francesco Calabró</option>
           </select>
         </div>
+      </div>
+
+      <!-- DATOS DE BANDA Y PRECIO -->
+      <div class="fila-3">
         <div>
-          <label>Ancho de Banda Contratado (Mbps) *</label>
+          <label>Ancho de Banda Contratado *</label>
           <div class="input-moneda">
             <input type="text" id="ancho_banda" name="ancho_banda" required placeholder="Ej: 1.000" oninput="formatearAnchoBanda(this)">
             <span style="border-radius: 0 4px 4px 0; border-left: none; border: 1px solid #ccc;">Mbps</span>
+          </div>
+        </div>
+        <div>
+          <label>Moneda *</label>
+          <select id="moneda_mb" name="moneda_mb" required onchange="actualizarSimboloMoneda()">
+            <option value="Pesos" selected>Pesos ($)</option>
+            <option value="Dolares">Dólares (u$s)</option>
+          </select>
+        </div>
+        <div>
+          <label>Precio del Mb *</label>
+          <div class="input-moneda">
+            <span id="simbolo_moneda_mb">$</span>
+            <input type="number" id="precio_mb" name="precio_mb" step="0.01" required>
           </div>
         </div>
       </div>
@@ -167,17 +204,14 @@
       <div class="titulo-seccion">1. DATOS DE LA CUENTA (Dpto. Comercial)</div>
       
       <div class="fila">
-        <!-- CAMBIO: oninput="espejarDatos()" para que la razón social pase a la firma final -->
         <div><label>Razón Social *</label><input type="text" id="razon_social" name="razon_social" required oninput="espejarDatos()"></div>
         <div><label>Domicilio *</label><input type="text" name="domicilio" required></div>
       </div>
 
       <div class="fila-3">
-        <!-- CAMBIO: oninput="espejarDatos()" para pasar la localidad al Dpto. Técnico -->
         <div><label>Localidad *</label><input type="text" id="localidad_comercial" name="localidad" required oninput="espejarDatos()"></div>
         <div>
           <label>Provincia *</label>
-          <!-- CAMBIO: onchange="espejarDatos()" para pasar la provincia al Dpto. Técnico -->
           <select id="provincia_comercial" name="provincia" required onchange="espejarDatos()">
             <option value="Córdoba" selected>Córdoba</option>
             <option value="Buenos Aires">Buenos Aires</option>
@@ -218,10 +252,30 @@
         </div>
       </div>
 
+      <!-- SECCIÓN DE 3 CORREOS ELECTRÓNICOS -->
       <div style="margin-top: 20px;">
-        <label>Correos Electrónicos * <span style="font-weight: normal; color: #666; font-size: 12px;">(Se adaptará a formato casilleros al imprimir)</span></label>
-        <input type="email" name="correo" class="no-imprimir" required placeholder="ejemplo@correo.com" oninput="actualizarCuadraditos(this.value)">
-        <div id="contenedor-cuadraditos" class="email-boxes-container"></div>
+        <h4 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 600; color: #333;">
+          Correos Electrónicos * 
+          <span style="font-weight: normal; color: #666; font-size: 12px;">(Se adaptarán a formato casilleros al imprimir)</span>
+        </h4>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="font-size: 13px; color: #444;">1. Domicilio Electrónico Especial</label>
+          <input type="email" name="correo_domicilio" class="no-imprimir" required placeholder="ejemplo@correo.com" oninput="actualizarCuadraditos(this.value, 'cajas-domicilio')">
+          <div id="cajas-domicilio" class="email-boxes-container"></div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="font-size: 13px; color: #444;">2. Referente Técnico Email</label>
+          <input type="email" name="correo_tecnico" class="no-imprimir" required placeholder="tecnico@correo.com" oninput="actualizarCuadraditos(this.value, 'cajas-tecnico')">
+          <div id="cajas-tecnico" class="email-boxes-container"></div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="font-size: 13px; color: #444;">3. Referente Comercial Email</label>
+          <input type="email" name="correo_comercial" class="no-imprimir" required placeholder="comercial@correo.com" oninput="actualizarCuadraditos(this.value, 'cajas-comercial')">
+          <div id="cajas-comercial" class="email-boxes-container"></div>
+        </div>
       </div>
     </fieldset>
 
@@ -262,10 +316,11 @@
             </div>
           </div>
           <div>
-            <label style="color: #2b6cb0;">Total</label>
+            <!-- COLOR: Verde oscuro para el Total -->
+            <label style="color: #0f5132;">Total</label>
             <div class="input-moneda">
-              <span style="background: #2b6cb0; color: white; border-color: #2b6cb0;">u$s</span>
-              <input type="text" id="tot_21" name="tot_21" readonly tabindex="-1" style="font-weight: bold; border-color: #2b6cb0; background-color: #ebf8ff; padding: 8px;">
+              <span style="background: #0f5132; color: white; border-color: #0f5132;">u$s</span>
+              <input type="text" id="tot_21" name="tot_21" readonly tabindex="-1" style="font-weight: bold; border-color: #0f5132; background-color: #e8f5e9; padding: 8px;">
             </div>
           </div>
         </div>
@@ -315,15 +370,13 @@
           <label>Cargos por Única Vez</label>
           <div class="input-moneda">
             <span>u$s</span>
-            <!-- Este se ingresa manual y no es obligatorio -->
-            <input type="number" id="cargos_unica_vez" name="cargos_unica_vez" step="0.01" oninput="calcularTotales()">
+            <input type="text" id="cargos_unica_vez" name="cargos_unica_vez" readonly tabindex="-1" style="background-color: #f9f9f9;">
           </div>
         </div>
         <div>
           <label>Cargos por Abonos de Servicios *</label>
           <div class="input-moneda">
             <span>u$s</span>
-            <!-- Viene de 2.2 automáticamente -->
             <input type="text" id="cargos_abonos" name="cargos_abonos" readonly required>
           </div>
         </div>
@@ -335,10 +388,11 @@
           <input type="text" id="duracion_contrato" name="duracion_contrato" readonly placeholder="Auto-completado (meses)">
         </div>
         <div>
-          <label style="color: #2b6cb0;">Valor Total del Contrato</label>
+          <!-- COLOR: Verde oscuro para el Valor Total -->
+          <label style="color: #0f5132;">Valor Total del Contrato</label>
           <div class="input-moneda">
-            <span style="background: #2b6cb0; color: white; border-color: #2b6cb0;">u$s</span>
-            <input type="text" id="valor_total_contrato" name="valor_total_contrato" readonly style="font-weight: bold; border-color: #2b6cb0; background-color: #ebf8ff;">
+            <span style="background: #0f5132; color: white; border-color: #0f5132;">u$s</span>
+            <input type="text" id="valor_total_contrato" name="valor_total_contrato" readonly style="font-weight: bold; border-color: #0f5132; background-color: #e8f5e9;">
           </div>
         </div>
       </div>
@@ -502,6 +556,12 @@
       </div>
     </div>
 
+    <!-- PIE DE PÁGINA INSTITUCIONAL -->
+    <div style="text-align: center; margin-top: 40px; font-size: 13px; color: #555; border-top: 1px solid #ddd; padding-top: 15px;">
+      <strong>Empresa Provincial de Energía de Córdoba Departamento Servicios de Telecomunicaciones</strong><br>
+      Tablada 350 – 5000 Córdoba Tel.: (0351) 429-650
+    </div>
+
   </form>
 </div>
 
@@ -514,17 +574,36 @@
     const campoFecha = document.getElementById('fecha_contrato');
     const hoy = new Date();
     
-    // Formato para el input type="date"
     const formatoLocal = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
     campoFecha.value = formatoLocal;
     
-    // Formato visual para la firma final (Ej: 24/07/2026)
     const fechaVisual = String(hoy.getDate()).padStart(2, '0') + '/' + String(hoy.getMonth() + 1).padStart(2, '0') + '/' + hoy.getFullYear();
     document.getElementById('texto_fecha_actual').innerText = fechaVisual;
 
-    actualizarCuadraditos('');
-    espejarDatos(); // Forzar la carga inicial de "Córdoba" en el dpto técnico
+    actualizarCuadraditos('', 'cajas-domicilio');
+    actualizarCuadraditos('', 'cajas-tecnico');
+    actualizarCuadraditos('', 'cajas-comercial');
+
+    espejarDatos(); 
   });
+
+  // 1.1 Actualizar Símbolo de Moneda
+  function actualizarSimboloMoneda() {
+    const selector = document.getElementById('moneda_mb');
+    const simbolo = document.getElementById('simbolo_moneda_mb');
+    
+    if (selector.value === 'Dolares') {
+      simbolo.innerText = 'u$s';
+    } else {
+      simbolo.innerText = '$';
+    }
+  }
+
+  // Función para dar formato de moneda con separador de miles
+  function formatearMonedaVisual(valor) {
+    if (valor <= 0) return '';
+    return valor.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   // 2. Formato de Ancho de Banda
   function formatearAnchoBanda(input) {
@@ -567,11 +646,14 @@
     }
   }
 
-  // 5. Generador de Cuadraditos
-  function actualizarCuadraditos(texto) {
-    const contenedor = document.getElementById('contenedor-cuadraditos');
+  // 5. Generador de Cuadraditos Actualizado
+  function actualizarCuadraditos(texto, contenedorId) {
+    const contenedor = document.getElementById(contenedorId);
+    if (!contenedor) return;
+    
     contenedor.innerHTML = '';
     const cantidadCajas = 40;
+    
     for (let i = 0; i < cantidadCajas; i++) {
       let div = document.createElement('div');
       div.className = 'email-box';
@@ -580,29 +662,31 @@
     }
   }
 
-  // 6. MOTOR DE CÁLCULO PARA LA SECCIÓN 3
+  // 6. MOTOR DE CÁLCULO ACTUALIZADO
   function calcularTotales() {
     let cuotas21 = parseInt(document.getElementById('cant_21').value) || 1;
     let importeTotal21 = parseFloat(document.getElementById('imp_21').value) || 0;
     let subtotal21 = importeTotal21 / cuotas21;
     
-    document.getElementById('sub_21').value = importeTotal21 > 0 ? subtotal21.toFixed(2) : '';
-    document.getElementById('tot_21').value = importeTotal21 > 0 ? importeTotal21.toFixed(2) : '';
+    document.getElementById('sub_21').value = formatearMonedaVisual(subtotal21);
+    document.getElementById('tot_21').value = formatearMonedaVisual(importeTotal21);
 
     let cant22 = parseInt(document.getElementById('cant_22').value) || 0;
     let imp22 = parseFloat(document.getElementById('imp_22').value) || 0;
     let tot22 = cant22 * imp22;
-    document.getElementById('tot_22').value = tot22 > 0 ? tot22.toFixed(2) : '';
+    document.getElementById('tot_22').value = formatearMonedaVisual(tot22);
 
     let textoMeses = cant22 > 0 ? cant22 + ' Meses' : '';
     document.getElementById('plazo_contrato').value = textoMeses;
     document.getElementById('duracion_contrato').value = textoMeses;
-    document.getElementById('cargos_abonos').value = tot22 > 0 ? tot22.toFixed(2) : '';
-
-    let cargosUnicaVez = parseFloat(document.getElementById('cargos_unica_vez').value) || 0;
-    let valorTotal = cargosUnicaVez + tot22;
     
-    document.getElementById('valor_total_contrato').value = valorTotal > 0 ? valorTotal.toFixed(2) : '';
+    document.getElementById('cargos_abonos').value = formatearMonedaVisual(tot22);
+
+    let cargosUnicaVez = importeTotal21;
+    document.getElementById('cargos_unica_vez').value = formatearMonedaVisual(cargosUnicaVez);
+    
+    let valorTotal = cargosUnicaVez + tot22;
+    document.getElementById('valor_total_contrato').value = formatearMonedaVisual(valorTotal);
   }
 
   // 7. Lógica: Calificación del Cliente (Sección 3)
@@ -614,12 +698,10 @@
     
     let requiereAutorizacion = false;
     
-    // Revisa si alguno de Veraz está en "Antecedentes" o "Requiere Autorización"
     for (let r of radiosVeraz) {
       if (r.checked && (r.value === 'Antecedentes' || r.value === 'Requiere Autorización')) requiereAutorizacion = true;
     }
     
-    // Revisa si alguno de Dpto Admin está en "Antecedentes" o "Requiere Autorización"
     for (let r of radiosAdmin) {
       if (r.checked && (r.value === 'Antecedentes' || r.value === 'Requiere Autorización')) requiereAutorizacion = true;
     }
@@ -630,7 +712,7 @@
     } else {
       cajaAutorizado.style.display = 'none';
       inputAutorizado.required = false;
-      inputAutorizado.value = ''; // Limpiar el campo
+      inputAutorizado.value = '';
     }
   }
 
@@ -646,7 +728,7 @@
     } else {
       cajaDetalle.style.display = 'none';
       inputDetalle.required = false;
-      inputDetalle.value = ''; // Limpiar el campo
+      inputDetalle.value = '';
     }
   }
 
@@ -656,11 +738,9 @@
     const localidadComercial = document.getElementById('localidad_comercial').value;
     const provinciaComercial = document.getElementById('provincia_comercial').value;
 
-    // Pasarlos a Sección 6
     document.getElementById('localidad_instalacion').value = localidadComercial;
     document.getElementById('provincia_instalacion').value = provinciaComercial;
 
-    // Pasarlo a la Firma
     const textoFirma = document.getElementById('texto_nombre_empresa');
     if (razonSocial.trim() !== '') {
       textoFirma.innerText = razonSocial;
